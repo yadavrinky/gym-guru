@@ -30,14 +30,16 @@ export default function LoginPage() {
 
       if (!res.ok) {
         const data = await res.json();
-        throw new Error(data.detail || 'Login failed');
+        const detail = data.detail;
+        throw new Error(typeof detail === 'string' ? detail : JSON.stringify(detail));
       }
 
       const data = await res.json();
       localStorage.setItem('unlox_token', data.access_token);
       router.push('/dashboard');
-    } catch (err) {
-      setError(err instanceof Error ? err.message : 'Something went wrong');
+    } catch (err: any) {
+      const msg = err.response?.data?.detail || err.message || 'Something went wrong';
+      setError(typeof msg === 'string' ? msg : JSON.stringify(msg));
     } finally {
       setLoading(false);
     }

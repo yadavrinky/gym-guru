@@ -15,3 +15,6 @@ pytest==8.2.0
 email-validator==2.1.1
 openai
 tslearn==0.6.3
+firebase-admin==6.5.0
+groq==0.5.0
+python-dotenv==1.0.1

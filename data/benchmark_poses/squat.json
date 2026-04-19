@@ -1,0 +1,17 @@
+{
+  "exercise": "squat",
+  "description": "Standard bodyweight squat",
+  "keyframes": [
+    { "phase": "standing", "angles": { "knee": 175, "hip": 170, "elbow": 160, "shoulder": 40 } },
+    { "phase": "descending_1", "angles": { "knee": 150, "hip": 145, "elbow": 160, "shoulder": 42 } },
+    { "phase": "descending_2", "angles": { "knee": 120, "hip": 110, "elbow": 160, "shoulder": 44 } },
+    { "phase": "bottom", "angles": { "knee": 85, "hip": 80, "elbow": 160, "shoulder": 45 } },
+    { "phase": "ascending_1", "angles": { "knee": 110, "hip": 105, "elbow": 160, "shoulder": 44 } },
+    { "phase": "ascending_2", "angles": { "knee": 140, "hip": 140, "elbow": 160, "shoulder": 42 } },
+    { "phase": "standing_return", "angles": { "knee": 175, "hip": 170, "elbow": 160, "shoulder": 40 } }
+  ],
+  "thresholds": {
+    "knee": { "min": 80, "max": 180, "warning_delta": 10 },
+    "hip": { "min": 70, "max": 175, "warning_delta": 10 }
+  }
+}

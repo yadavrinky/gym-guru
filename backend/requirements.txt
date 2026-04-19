@@ -1,0 +1,17 @@
+fastapi==0.111.0
+uvicorn[standard]==0.29.0
+pymongo==4.6.2
+motor==3.4.0
+beanie==1.26.0
+pydantic==2.7.1
+pydantic-settings==2.2.1
+pyjwt==2.8.0
+passlib[bcrypt]==1.7.4
+python-multipart==0.0.9
+APScheduler==3.10.4
+numpy==1.26.4
+httpx==0.27.0
+pytest==8.2.0
+email-validator==2.1.1
+openai
+tslearn==0.6.3

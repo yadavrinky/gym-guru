@@ -1,0 +1,41 @@
+{
+  "name": "unlox-frontend",
+  "version": "0.1.0",
+  "private": true,
+  "scripts": {
+    "dev": "next dev",
+    "build": "next build",
+    "start": "next start",
+    "lint": "next lint"
+  },
+  "dependencies": {
+    "@mediapipe/camera_utils": "^0.3.1640029074",
+    "@mediapipe/drawing_utils": "^0.3.1620248257",
+    "@mediapipe/pose": "^0.5.1675469404",
+    "axios": "^1.6.8",
+    "clsx": "^2.1.1",
+    "firebase": "^12.12.0",
+    "framer-motion": "^11.1.7",
+    "lucide-react": "^0.378.0",
+    "next": "14.2.3",
+    "plotly.js-dist-min": "^3.5.0",
+    "react": "^18",
+    "react-dom": "^18",
+    "react-plotly.js": "^2.6.0",
+    "react-webcam": "^7.2.0",
+    "recharts": "^2.12.7",
+    "tailwind-merge": "^2.3.0"
+  },
+  "devDependencies": {
+    "@types/node": "^20",
+    "@types/react": "^18",
+    "@types/react-dom": "^18",
+    "@types/react-plotly.js": "^2.6.4",
+    "autoprefixer": "^10.5.0",
+    "eslint": "^8",
+    "eslint-config-next": "14.2.3",
+    "postcss": "^8",
+    "tailwindcss": "^3.4.1",
+    "typescript": "^5"
+  }
+}

@@ -1,0 +1,21 @@
+version: '3.8'
+
+services:
+  mongo:
+    image: mongo:7.0
+    container_name: unlox_mongo
+    ports:
+      - "27017:27017"
+    volumes:
+      - unlox_mongo_data:/data/db
+    restart: unless-stopped
+
+  redis:
+    image: redis:7
+    container_name: unlox_redis
+    ports:
+      - "6379:6379"
+    restart: unless-stopped
+
+volumes:
+  unlox_mongo_data:

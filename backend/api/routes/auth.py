@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
 from datetime import timedelta
 from db.models.users import User
-from core.security import get_password_hash, verify_password, create_access_token
+from core.security import get_password_hash, verify_password, create_access_token, get_current_user
 from core.config import settings
 import firebase_admin
 from firebase_admin import credentials, auth as firebase_auth
@@ -106,3 +106,16 @@ async def google_auth(req: GoogleAuthRequest):
             detail=f"Invalid Google Token: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
+
+class ProfilePictureUpdate(BaseModel):
+    avatar_url: str
+
+@router.put("/profile-picture")
+async def update_profile_picture(
+    payload: ProfilePictureUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    current_user.avatar_url = payload.avatar_url
+    await current_user.save()
+    return {"status": "success", "avatar_url": current_user.avatar_url}
+

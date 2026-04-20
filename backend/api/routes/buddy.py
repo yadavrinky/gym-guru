@@ -1,3 +1,4 @@
+import httpx
 from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
 from openai import AsyncOpenAI
@@ -11,21 +12,40 @@ client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
-def classify_sentiment(text: str) -> str:
+async def classify_sentiment(text: str) -> str:
     """
-    Mock classification. In a real app, this would route to a DistilBERT
-    microservice or local HuggingFace pipeline.
+    Uses Hugging Face Inference API (SST-2) to detect sentiment.
+    Falls back to keyword matching if API fails or key is missing.
     """
-    text = text.lower()
-    if any(word in text for word in ["tired", "exhausted", "sore"]):
-        return "tired"
-    if any(word in text for word in ["stressed", "anxious", "worried"]):
-        return "anxious"
-    if any(word in text for word in ["angry", "mad", "frustrated"]):
-        return "frustrated"
-    if any(word in text for word in ["ready", "pumped", "let's go"]):
-        return "motivated"
-    return "neutral"
+    if not settings.HUGGINGFACE_API_KEY:
+        text = text.lower()
+        if any(word in text for word in ["tired", "exhausted", "sore"]):
+            return "tired"
+        if any(word in text for word in ["ready", "pumped", "let's go"]):
+            return "motivated"
+        return "neutral"
+
+    API_URL = "https://api-inference.huggingface.co/models/distilbert-base-uncased-finetuned-sst-2-english"
+    headers = {"Authorization": f"Bearer {settings.HUGGINGFACE_API_KEY}"}
+    
+    try:
+        async with httpx.AsyncClient() as h_client:
+            response = await h_client.post(API_URL, headers=headers, json={"inputs": text}, timeout=5.0)
+            result = response.json()
+            # Handle list of results
+            top_result = result[0][0] if isinstance(result, list) else result[0]
+            label = top_result['label'].upper()
+            
+            if label == "POSITIVE":
+                return "motivated"
+            else:
+                # Contextual negative detection
+                if any(word in text.lower() for word in ["tired", "exhausted", "pain", "sore"]):
+                    return "tired"
+                return "neutral"
+    except Exception as e:
+        print(f"HuggingFace Error: {e}")
+        return "neutral"
 
 PROMPT_TEMPLATES = {
     "motivated": "Match their energy. Celebrate wins. Suggest a slight increase in challenge.",
@@ -45,8 +65,9 @@ async def buddy_chat_endpoint(websocket: WebSocket):
         while True:
             data = await websocket.receive_text()
             
-            sentiment = classify_sentiment(data)
-            template_instruction = PROMPT_TEMPLATES[sentiment]
+            # Now an async call
+            sentiment = await classify_sentiment(data)
+            template_instruction = PROMPT_TEMPLATES.get(sentiment, PROMPT_TEMPLATES["neutral"])
             
             # Build system prompt dynamically based on sentiment
             system_prompt = f"You are GYM GURU Buddy, an emotionally intelligent fitness companion. The user seems {sentiment}. {template_instruction} Keep responses concise, warm, and under 60 words."

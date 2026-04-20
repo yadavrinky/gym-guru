@@ -1,7 +1,9 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 import json
 from openai import AsyncOpenAI
 from core.config import settings
+from core.security import get_current_user
+from db.models.users import User
 
 router = APIRouter()
 
@@ -51,10 +53,43 @@ async def diet_chat_endpoint(websocket: WebSocket):
         pass
 
 @router.get("/plan")
-async def get_diet_plan():
-    return {
-        "daily_targets": {"calories": 2200, "protein_g": 160, "carbs_g": 250, "fat_g": 70},
-        "meals": [
-            {"meal_type": "Breakfast", "items": [{"name": "Oatmeal", "calories": 300}]}
-        ]
-    }
+async def get_diet_plan(current_user: User = Depends(get_current_user)):
+    """
+    Generates a dynamic diet plan based on user profile using Groq.
+    """
+    if not settings.GROQ_API_KEY:
+        return {
+            "daily_targets": {"calories": 2200, "protein_g": 160, "carbs_g": 250, "fat_g": 70},
+            "meals": [{"meal_type": "Mock", "items": [{"name": "Add Groq Key for real plan", "calories": 0}]}]
+        }
+
+    profile = current_user.profile
+    prompt = f"""
+    Generate a highly personalized fitness metabolic diet plan in JSON format.
+    User Profile:
+    - Weight: {profile.weight_kg}kg
+    - Height: {profile.height_cm}cm
+    - Fitness Goal: {profile.fitness_goal}
+    - Dietary Preference: {profile.dietary_preference}
+    - Activity Level: {profile.activity_level}
+
+    Requirements:
+    1. Output MUST be valid JSON.
+    2. Include 'daily_targets' with 'calories', 'protein_g', 'carbs_g', 'fat_g'.
+    3. Include 'meals' array with 'meal_type' and 'items' (name, calories).
+    4. Keep it professional and nutritional.
+    """
+
+    try:
+        response = await client.chat.completions.create(
+            model="llama-3.3-70b-versatile",
+            messages=[
+                {"role": "system", "content": "You are a professional JSON generator for fitness nutrition."},
+                {"role": "user", "content": prompt}
+            ],
+            response_format={"type": "json_object"}
+        )
+        plan_data = json.loads(response.choices[0].message.content)
+        return plan_data
+    except Exception as e:
+        return {"error": f"Failed to generate plan: {str(e)}"}

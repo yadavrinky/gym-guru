@@ -6,6 +6,7 @@ export const API_ENDPOINTS = {
         REGISTER: `${API_BASE_URL}/api/auth/register`,
         LOGIN: `${API_BASE_URL}/api/auth/login`,
         GOOGLE: `${API_BASE_URL}/api/auth/google`,
+        PROFILE_PICTURE: `${API_BASE_URL}/api/auth/profile-picture`,
     },
     WORKOUT: {
         SESSIONS: `${API_BASE_URL}/api/workout/sessions`,

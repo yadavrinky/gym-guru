@@ -1,12 +1,13 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
+import Navigation from "@/components/Navigation";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "UNLOX - AI Gym & Fitness Assistant",
-  description: "A unified, camera-only AI fitness ecosystem for UNLOX.",
+  title: "GYM GURU - AI Gym & Fitness Assistant",
+  description: "A unified, camera-only AI fitness ecosystem for GYM GURU.",
 };
 
 export default function RootLayout({
@@ -16,7 +17,10 @@ export default function RootLayout({
 }>) {
   return (
     <html lang="en">
-      <body className={inter.className}>{children}</body>
+      <body className={inter.className}>
+        <Navigation />
+        {children}
+      </body>
     </html>
   );
 }

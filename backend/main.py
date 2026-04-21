@@ -21,7 +21,7 @@ async def lifespan(app: FastAPI):
     client.close()
 
 app = FastAPI(
-    title="UNLOX AI Fitness API",
+    title="GYM GURU AI Fitness API",
     description="Camera-only AI Gym & Fitness Assistant by Rivoquix Learning",
     version="1.0.0",
     lifespan=lifespan,
@@ -46,4 +46,4 @@ app.include_router(analytics.router, prefix="/api/analytics", tags=["analytics"]
 
 @app.get("/", tags=["health"])
 def health_check():
-    return {"status": "ok", "app": "UNLOX AI Fitness API", "version": "1.0.0"}
+    return {"status": "ok", "app": "GYM GURU AI Fitness API", "version": "1.0.0"}

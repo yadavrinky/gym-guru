@@ -3,7 +3,7 @@ import { ArrowRight, Activity, Camera, Brain, MessageSquare } from "lucide-react
 
 export default function Home() {
   return (
-    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-dark text-white bg-gradient-to-br from-slate-900 to-black">
+    <main className="min-h-screen flex flex-col items-center justify-center p-8 bg-dark text-slate-900 bg-gradient-to-br from-slate-50 to-gray-200">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
          <div className="absolute -top-[30%] -left-[10%] w-[70%] h-[70%] rounded-full bg-emerald-500/10 blur-[120px]" />
          <div className="absolute top-[20%] -right-[20%] w-[60%] h-[60%] rounded-full bg-blue-500/10 blur-[100px]" />
@@ -44,7 +44,7 @@ export default function Home() {
           <Link href="/login" className="px-8 py-4 bg-emerald-500 hover:bg-emerald-600 text-slate-950 font-bold rounded-full transition-all flex items-center gap-2 transform hover:scale-105 shadow-xl shadow-emerald-500/20">
             Get Started <ArrowRight className="w-5 h-5" />
           </Link>
-          <Link href="/register" className="px-8 py-4 glass-dark hover:bg-white/10 text-white font-medium rounded-full transition-all">
+          <Link href="/register" className="px-8 py-4 glass-dark hover:bg-white/10 text-slate-900 font-medium rounded-full transition-all">
             Sign Up
           </Link>
         </div>
@@ -57,7 +57,7 @@ function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: stri
   return (
     <div className="glass-dark p-6 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
       <div className="mb-4">{icon}</div>
-      <h3 className="text-xl font-bold text-white mb-2">{title}</h3>
+      <h3 className="text-xl font-bold text-slate-900 mb-2">{title}</h3>
       <p className="text-slate-400 text-sm leading-relaxed">{desc}</p>
     </div>
   )

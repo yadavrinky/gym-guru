@@ -1,5 +1,6 @@
 from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr
+from typing import Optional
 from datetime import timedelta
 from db.models.users import User
 from core.security import get_password_hash, verify_password, create_access_token, get_current_user
@@ -23,6 +24,12 @@ class UserCreate(BaseModel):
     email: EmailStr
     password: str
     name: str
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    fitness_goal: Optional[str] = None
+    experience_level: Optional[str] = None
+    workouts_per_week: Optional[int] = None
 
 class Token(BaseModel):
     access_token: str
@@ -47,7 +54,15 @@ async def register(user_data: UserCreate):
     user = User(
         email=user_data.email,
         password_hash=hashed_password,
-        name=user_data.name
+        name=user_data.name,
+        profile={
+            "age": user_data.age,
+            "weight_kg": user_data.weight_kg,
+            "height_cm": user_data.height_cm,
+            "fitness_goal": user_data.fitness_goal,
+            "experience_level": user_data.experience_level,
+            "workouts_per_week": user_data.workouts_per_week
+        }
     )
     await user.insert()
 
@@ -109,6 +124,18 @@ async def google_auth(req: GoogleAuthRequest):
 
 class ProfilePictureUpdate(BaseModel):
     avatar_url: str
+
+class NameUpdate(BaseModel):
+    name: str
+
+@router.put("/update-name")
+async def update_name(
+    payload: NameUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    current_user.name = payload.name
+    await current_user.save()
+    return {"status": "success", "name": current_user.name}
 
 @router.put("/profile-picture")
 async def update_profile_picture(

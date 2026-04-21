@@ -17,14 +17,14 @@ export default function WorkoutPage() {
   const current = EXERCISES.find(e => e.id === selectedExercise) || EXERCISES[0];
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-900 to-black text-white p-4 md:p-8">
+    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-200 text-slate-900 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <header className="flex items-center justify-between">
           <div>
             <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
               <Dumbbell className="text-emerald-400" /> AI Trainer
             </h1>
-            <p className="text-white/50 mt-1">100% on-device — zero video upload</p>
+            <p className="text-slate-900/50 mt-1">100% on-device — zero video upload</p>
           </div>
 
           {/* Exercise Selector */}
@@ -70,7 +70,7 @@ export default function WorkoutPage() {
 function InfoCard({ label, value }: { label: string; value: string }) {
   return (
     <div className="glass-dark p-4 rounded-2xl">
-      <div className="text-xs text-white/40 uppercase tracking-widest mb-1">{label}</div>
+      <div className="text-xs text-slate-900/40 uppercase tracking-widest mb-1">{label}</div>
       <div className="text-lg font-semibold">{value}</div>
     </div>
   );

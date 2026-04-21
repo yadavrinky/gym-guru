@@ -84,7 +84,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     <div className="flex flex-col h-[500px] w-full max-w-2xl mx-auto glass-dark rounded-3xl overflow-hidden shadow-2xl">
       {/* Header */}
       <div className="px-6 py-4 border-b border-white/10 flex items-center justify-between">
-        <span className="text-white font-semibold">{botName}</span>
+        <span className="text-slate-900 font-semibold">{botName}</span>
         <span className={`w-2 h-2 rounded-full ${isConnected ? 'bg-emerald-400' : 'bg-red-400'}`} />
       </div>
 
@@ -93,10 +93,10 @@ const ChatBox: React.FC<ChatBoxProps> = ({
         {messages.map((msg, idx) => (
           <div key={idx} className={`flex ${msg.role === 'user' ? 'justify-end' : 'justify-start'}`}>
             <div className={`flex gap-3 max-w-[80%] ${msg.role === 'user' ? 'flex-row-reverse' : ''}`}>
-              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${msg.role === 'user' ? 'bg-emerald-500 text-slate-900' : 'bg-blue-500 text-white'}`}>
+              <div className={`w-8 h-8 rounded-full flex-shrink-0 flex items-center justify-center ${msg.role === 'user' ? 'bg-emerald-500 text-white' : 'bg-blue-500 text-white'}`}>
                 {msg.role === 'user' ? <User size={16} /> : <Bot size={16} />}
               </div>
-              <div className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-emerald-500 text-slate-900 font-medium' : 'bg-white/10 text-white'}`}>
+              <div className={`p-4 rounded-2xl ${msg.role === 'user' ? 'bg-emerald-500 text-white font-medium' : 'bg-white/10 text-white'}`}>
                 {msg.content}
               </div>
             </div>
@@ -113,7 +113,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
           onChange={(e) => setInput(e.target.value)}
           onKeyDown={(e) => e.key === 'Enter' && sendMessage()}
           placeholder="Type your message..."
-          className="flex-1 bg-white/5 rounded-xl border border-white/10 focus:border-emerald-500 focus:outline-none text-white placeholder-white/40 px-4 py-2 transition-colors"
+          className="flex-1 bg-white/5 rounded-xl border border-white/10 focus:border-emerald-500 focus:outline-none text-slate-900 placeholder-white/40 px-4 py-2 transition-colors"
         />
         <button
           onClick={sendMessage}

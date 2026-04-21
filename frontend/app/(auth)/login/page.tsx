@@ -35,7 +35,7 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('unlox_token', data.access_token);
+      localStorage.setItem('gym_guru_token', data.access_token);
       router.push('/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.detail || err.message || 'Something went wrong';
@@ -67,7 +67,7 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('unlox_token', data.access_token);
+      localStorage.setItem('gym_guru_token', data.access_token);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google Auth Error');
@@ -77,7 +77,7 @@ export default function LoginPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black p-4">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-gray-200 p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[30%] -left-[10%] w-[60%] h-[60%] rounded-full bg-emerald-500/8 blur-[120px]" />
         <div className="absolute top-[30%] -right-[15%] w-[50%] h-[50%] rounded-full bg-blue-500/8 blur-[100px]" />
@@ -86,7 +86,7 @@ export default function LoginPage() {
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-black italic tracking-tighter text-emerald-400 mb-2">GYM GURU</h1>
-          <p className="text-white/50">Sign in to your fitness journey</p>
+          <p className="text-slate-900/50">Sign in to your fitness journey</p>
         </div>
 
         <form onSubmit={handleLogin} className="glass-dark rounded-3xl p-8 space-y-6">
@@ -97,32 +97,32 @@ export default function LoginPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 block">Email</label>
+            <label className="text-sm text-slate-900/60 block">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-white/30 transition-colors"
+              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
               placeholder="you@example.com"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 block">Password</label>
+            <label className="text-sm text-slate-900/60 block">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
                 value={password}
                 onChange={(e) => setPassword(e.target.value)}
                 required
-                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-white/30 transition-colors pr-12"
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors pr-12"
                 placeholder="••••••••"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-900/40 hover:text-white/70 transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
@@ -158,7 +158,7 @@ export default function LoginPage() {
             </button>
           </div>
 
-          <p className="text-center text-white/40 text-sm">
+          <p className="text-center text-slate-900/40 text-sm">
             Don&apos;t have an account?{' '}
             <Link href="/register" className="text-emerald-400 hover:text-emerald-300 transition-colors">
               Sign Up

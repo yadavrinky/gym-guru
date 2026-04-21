@@ -14,6 +14,12 @@ export default function RegisterPage() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
+  const [age, setAge] = useState('');
+  const [weightKg, setWeightKg] = useState('');
+  const [heightCm, setHeightCm] = useState('');
+  const [fitnessGoal, setFitnessGoal] = useState('Weight Loss');
+  const [experienceLevel, setExperienceLevel] = useState('Beginner');
+  const [workoutsPerWeek, setWorkoutsPerWeek] = useState('');
   const [error, setError] = useState('');
   const [loading, setLoading] = useState(false);
 
@@ -26,7 +32,15 @@ export default function RegisterPage() {
       const res = await fetch(API_ENDPOINTS.AUTH.REGISTER, {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
-        body: JSON.stringify({ email, password, name }),
+        body: JSON.stringify({ 
+          email, password, name,
+          age: age ? parseInt(age) : null,
+          weight_kg: weightKg ? parseFloat(weightKg) : null,
+          height_cm: heightCm ? parseFloat(heightCm) : null,
+          fitness_goal: fitnessGoal,
+          experience_level: experienceLevel,
+          workouts_per_week: workoutsPerWeek ? parseInt(workoutsPerWeek) : null
+        }),
       });
 
       if (!res.ok) {
@@ -36,7 +50,7 @@ export default function RegisterPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('unlox_token', data.access_token);
+      localStorage.setItem('gym_guru_token', data.access_token);
       router.push('/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.detail || err.message || 'Something went wrong';
@@ -68,7 +82,7 @@ export default function RegisterPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('unlox_token', data.access_token);
+      localStorage.setItem('gym_guru_token', data.access_token);
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google Auth Error');
@@ -78,7 +92,7 @@ export default function RegisterPage() {
   };
 
   return (
-    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-900 to-black p-4">
+    <main className="min-h-screen flex items-center justify-center bg-gradient-to-br from-slate-50 to-gray-200 p-4">
       <div className="absolute inset-0 overflow-hidden pointer-events-none">
         <div className="absolute -top-[30%] -left-[10%] w-[60%] h-[60%] rounded-full bg-emerald-500/8 blur-[120px]" />
         <div className="absolute top-[30%] -right-[15%] w-[50%] h-[50%] rounded-full bg-cyan-500/8 blur-[100px]" />
@@ -87,7 +101,7 @@ export default function RegisterPage() {
       <div className="w-full max-w-md z-10">
         <div className="text-center mb-10">
           <h1 className="text-4xl font-black italic tracking-tighter text-emerald-400 mb-2">GYM GURU</h1>
-          <p className="text-white/50">Start your AI fitness journey today</p>
+          <p className="text-slate-900/50">Start your AI fitness journey today</p>
         </div>
 
         <form onSubmit={handleRegister} className="glass-dark rounded-3xl p-8 space-y-6">
@@ -98,31 +112,31 @@ export default function RegisterPage() {
           )}
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 block">Full Name</label>
+            <label className="text-sm text-slate-900/60 block">Full Name</label>
             <input
               type="text"
               value={name}
               onChange={(e) => setName(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-white/30 transition-colors"
+              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
               placeholder="Jane Doe"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 block">Email</label>
+            <label className="text-sm text-slate-900/60 block">Email</label>
             <input
               type="email"
               value={email}
               onChange={(e) => setEmail(e.target.value)}
               required
-              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-white/30 transition-colors"
+              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
               placeholder="you@example.com"
             />
           </div>
 
           <div className="space-y-2">
-            <label className="text-sm text-white/60 block">Password</label>
+            <label className="text-sm text-slate-900/60 block">Password</label>
             <div className="relative">
               <input
                 type={showPassword ? 'text' : 'password'}
@@ -130,17 +144,91 @@ export default function RegisterPage() {
                 onChange={(e) => setPassword(e.target.value)}
                 required
                 minLength={8}
-                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-white placeholder-white/30 transition-colors pr-12"
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors pr-12"
                 placeholder="Min 8 characters"
               />
               <button
                 type="button"
                 onClick={() => setShowPassword(!showPassword)}
-                className="absolute right-3 top-1/2 -translate-y-1/2 text-white/40 hover:text-white/70 transition-colors"
+                className="absolute right-3 top-1/2 -translate-y-1/2 text-slate-900/40 hover:text-white/70 transition-colors"
               >
                 {showPassword ? <EyeOff size={18} /> : <Eye size={18} />}
               </button>
             </div>
+          </div>
+
+          {/* Onboarding Questions */}
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm text-slate-900/60 block">Age</label>
+              <input
+                type="number"
+                value={age}
+                onChange={(e) => setAge(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
+                placeholder="25"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-slate-900/60 block">Workouts/Week</label>
+              <input
+                type="number"
+                value={workoutsPerWeek}
+                onChange={(e) => setWorkoutsPerWeek(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
+                placeholder="3"
+              />
+            </div>
+          </div>
+
+          <div className="grid grid-cols-2 gap-4">
+            <div className="space-y-2">
+              <label className="text-sm text-slate-900/60 block">Weight (kg)</label>
+              <input
+                type="number"
+                value={weightKg}
+                onChange={(e) => setWeightKg(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
+                placeholder="70"
+              />
+            </div>
+            <div className="space-y-2">
+              <label className="text-sm text-slate-900/60 block">Height (cm)</label>
+              <input
+                type="number"
+                value={heightCm}
+                onChange={(e) => setHeightCm(e.target.value)}
+                className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 placeholder-white/30 transition-colors"
+                placeholder="175"
+              />
+            </div>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-slate-900/60 block">Experience Level</label>
+            <select
+              value={experienceLevel}
+              onChange={(e) => setExperienceLevel(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 [&>option]:text-slate-900 transition-colors"
+            >
+              <option value="Beginner">Beginner</option>
+              <option value="Intermediate">Intermediate</option>
+              <option value="Advanced">Advanced</option>
+            </select>
+          </div>
+
+          <div className="space-y-2">
+            <label className="text-sm text-slate-900/60 block">Fitness Goal</label>
+            <select
+              value={fitnessGoal}
+              onChange={(e) => setFitnessGoal(e.target.value)}
+              className="w-full bg-white/5 border border-white/10 focus:border-emerald-500 focus:outline-none rounded-xl px-4 py-3 text-slate-900 [&>option]:text-slate-900 transition-colors"
+            >
+              <option value="Weight Loss">Weight Loss</option>
+              <option value="Muscle Gain">Muscle Gain</option>
+              <option value="Maintenance">Maintenance</option>
+              <option value="Endurance">Endurance</option>
+            </select>
           </div>
 
           <div className="space-y-3">
@@ -172,7 +260,7 @@ export default function RegisterPage() {
             </button>
           </div>
 
-          <p className="text-center text-white/40 text-sm">
+          <p className="text-center text-slate-900/40 text-sm">
             Already have an account?{' '}
             <Link href="/login" className="text-emerald-400 hover:text-emerald-300 transition-colors">
               Sign In

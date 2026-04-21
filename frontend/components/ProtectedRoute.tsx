@@ -8,7 +8,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
   const [isAuthorized, setIsAuthorized] = useState(false);
 
   useEffect(() => {
-    const token = localStorage.getItem('unlox_token');
+    const token = localStorage.getItem('gym_guru_token');
     
     if (!token) {
       router.push('/login');
@@ -19,7 +19,7 @@ export default function ProtectedRoute({ children }: { children: React.ReactNode
 
   if (!isAuthorized) {
     return (
-      <div className="min-h-screen bg-slate-900 flex items-center justify-center">
+      <div className="min-h-screen bg-slate-50 flex items-center justify-center">
         <div className="w-10 h-10 border-4 border-emerald-400 border-t-transparent rounded-full animate-spin" />
       </div>
     );

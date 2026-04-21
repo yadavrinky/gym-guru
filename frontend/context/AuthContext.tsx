@@ -25,7 +25,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   const [isLoading, setIsLoading] = useState(true);
 
   useEffect(() => {
-    const storedToken = localStorage.getItem('unlox_token');
+    const storedToken = localStorage.getItem('gym_guru_token');
     if (storedToken) {
       setToken(storedToken);
       // In a real app, you'd fetch the user profile here using the token
@@ -36,13 +36,13 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
   }, []);
 
   const login = (newToken: string) => {
-    localStorage.setItem('unlox_token', newToken);
+    localStorage.setItem('gym_guru_token', newToken);
     setToken(newToken);
     setUser({ id: '1', email: 'user@example.com', name: 'User' });
   };
 
   const logout = () => {
-    localStorage.removeItem('unlox_token');
+    localStorage.removeItem('gym_guru_token');
     setToken(null);
     setUser(null);
   };

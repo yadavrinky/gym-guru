@@ -12,6 +12,8 @@ class UserProfile(BaseModel):
     fitness_goal: Optional[str] = None
     dietary_preference: Optional[str] = None
     activity_level: Optional[str] = None
+    experience_level: Optional[str] = None
+    workouts_per_week: Optional[int] = None
 
 def get_utc_now():
     return datetime.now(timezone.utc)

@@ -7,10 +7,12 @@ import ChatBox from '@/components/chat/ChatBox';
 import ProtectedRoute from '@/components/ProtectedRoute';
 import { Camera, Utensils, LayoutDashboard, Settings as SettingsIcon } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
 
 export default function DashboardPage() {
+  const { user } = useAuth();
   const [activeTab, setActiveTab] = useState<'trainer' | 'dietician' | 'analytics' | 'settings'>('trainer');
   
   const quotes = [
@@ -133,11 +135,11 @@ export default function DashboardPage() {
               <p className="text-slate-900/60">Powered by GYM GURU AI Engine</p>
             </div>
             <div className="flex items-center gap-4">
-              {avatarUrl ? (
-                <img src={avatarUrl} alt="Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
+              {user?.avatar_url ? (
+                <img src={user.avatar_url} alt="Avatar" className="w-12 h-12 rounded-full object-cover border-2 border-emerald-500" />
               ) : (
                 <div className="w-12 h-12 rounded-full bg-emerald-500 flex items-center justify-center font-bold text-dark">
-                  RY
+                  {user?.name?.split(' ').map(n => n[0]).join('').toUpperCase() || 'GYM'}
                 </div>
               )}
               <button

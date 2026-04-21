@@ -9,20 +9,23 @@ from db.models.workout import WorkoutSession
 
 router = APIRouter()
 
-@router.get("/summary/{user_id}")
-async def get_summary(user_id: str):
-    """Dashboard analytics summary. In production, aggregates
-    from workout_sessions and habit_logs."""
+@router.get("/summary/me")
+async def get_summary(current_user: User = Depends(get_current_user)):
+    """Dashboard analytics summary. Requires authentication."""
+    sessions = await WorkoutSession.find(
+        WorkoutSession.user_id == str(current_user.id)
+    ).to_list()
+
+    total_reps = sum(s.reps for s in sessions)
+    avg_form = round(sum(s.form_score for s in sessions) / max(len(sessions), 1), 1)
+    total_cals = round(sum(s.calories_burned for s in sessions), 1)
+
     return {
-        "user_id": user_id,
-        "total_sessions": 42,
-        "total_reps": 1260,
-        "avg_form_score": 87.3,
-        "avg_performance_score": 82.1,
-        "current_streak": 5,
-        "calories_burned_week": 2340,
-        "top_exercise": "squat",
-        "weekly_sessions": [3, 4, 5, 3, 4, 6, 5],
+        "user_id": str(current_user.id),
+        "total_sessions": len(sessions),
+        "total_reps": total_reps,
+        "avg_form_score": avg_form,
+        "calories_burned_total": total_cals,
     }
 
 

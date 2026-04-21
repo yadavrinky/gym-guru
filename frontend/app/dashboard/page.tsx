@@ -2,11 +2,10 @@
 "use client";
 
 import React, { useState, useEffect } from 'react';
-import dynamic from 'next/dynamic';
 import WebcamTracker from '@/components/camera/WebcamTracker';
 import ChatBox from '@/components/chat/ChatBox';
 import ProtectedRoute from '@/components/ProtectedRoute';
-import { Camera, Utensils, LayoutDashboard, Settings as SettingsIcon, Upload } from 'lucide-react';
+import { Camera, Utensils, LayoutDashboard, Settings as SettingsIcon } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
 
 import { AreaChart, Area, XAxis, YAxis, CartesianGrid, Tooltip, ResponsiveContainer } from 'recharts';
@@ -28,60 +27,29 @@ export default function DashboardPage() {
   // Real Analytics State
   const [chartData, setChartData] = useState<{name: string, reps: number}[]>([]);
   const [totalWeeklyReps, setTotalWeeklyReps] = useState(0);
-  const [uploadingAvatar, setUploadingAvatar] = useState(false);
-  const [avatarUrl, setAvatarUrl] = useState<string | null>(null);
   const [name, setName] = useState('');
 
   const handleUpdateName = async () => {
     const token = localStorage.getItem('gym_guru_token');
-    if (!token) return;
+    if (!token || !name.trim()) return;
     try {
       const baseUrl = API_ENDPOINTS.AUTH.LOGIN.replace('/api/auth/login', '');
-      await fetch(`${baseUrl}/api/auth/update-name`, {
+      const res = await fetch(`${baseUrl}/api/auth/update-name`, {
         method: 'PUT',
         headers: {
           'Content-Type': 'application/json',
           'Authorization': `Bearer ${token}`
         },
-        body: JSON.stringify({ name })
+        body: JSON.stringify({ name: name.trim() })
       });
-      alert('Name updated successfully!');
+      if (res.ok) {
+        alert('Name updated successfully!');
+      } else {
+        alert('Failed to update name');
+      }
     } catch (error) {
       console.error('Update failed', error);
       alert('Failed to update name');
-    }
-  };
-
-  const handleAvatarUpload = async (e: React.ChangeEvent<HTMLInputElement>) => {
-    const file = e.target.files?.[0];
-    if (!file) return;
-
-    setUploadingAvatar(true);
-    try {
-      const { ref, uploadBytes, getDownloadURL } = await import('firebase/storage');
-      const { storage } = await import('@/utils/firebase');
-      
-      const storageRef = ref(storage, `avatars/${Date.now()}_${file.name}`);
-      const snapshot = await uploadBytes(storageRef, file);
-      const downloadURL = await getDownloadURL(snapshot.ref);
-      
-      // Update backend
-      const token = localStorage.getItem('gym_guru_token');
-      if (token) {
-        await fetch(API_ENDPOINTS.AUTH.PROFILE_PICTURE, {
-          method: 'PUT',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${token}`
-          },
-          body: JSON.stringify({ avatar_url: downloadURL })
-        });
-      }
-      setAvatarUrl(downloadURL);
-    } catch (error) {
-      console.error("Upload failed", error);
-    } finally {
-      setUploadingAvatar(false);
     }
   };
 
@@ -234,11 +202,11 @@ export default function DashboardPage() {
                                 <stop offset="95%" stopColor="#10b981" stopOpacity={0}/>
                               </linearGradient>
                             </defs>
-                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(255,255,255,0.1)" vertical={false} />
-                            <XAxis dataKey="name" stroke="rgba(255,255,255,0.4)" fontSize={12} tickLine={false} axisLine={false} />
-                            <YAxis stroke="rgba(255,255,255,0.4)" fontSize={12} tickLine={false} axisLine={false} />
+                            <CartesianGrid strokeDasharray="3 3" stroke="rgba(0,0,0,0.08)" vertical={false} />
+                            <XAxis dataKey="name" stroke="rgba(0,0,0,0.4)" fontSize={12} tickLine={false} axisLine={false} />
+                            <YAxis stroke="rgba(0,0,0,0.4)" fontSize={12} tickLine={false} axisLine={false} />
                             <Tooltip 
-                              contentStyle={{ backgroundColor: '#0f172a', border: '1px solid rgba(255,255,255,0.1)', borderRadius: '8px' }}
+                              contentStyle={{ backgroundColor: '#ffffff', border: '1px solid rgba(0,0,0,0.1)', borderRadius: '8px', color: '#0f172a' }}
                               itemStyle={{ color: '#10b981' }}
                             />
                             <Area type="monotone" dataKey="reps" stroke="#10b981" fillOpacity={1} fill="url(#colorReps)" strokeWidth={3} />

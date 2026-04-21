@@ -6,11 +6,14 @@ export const API_ENDPOINTS = {
         REGISTER: `${API_BASE_URL}/api/auth/register`,
         LOGIN: `${API_BASE_URL}/api/auth/login`,
         GOOGLE: `${API_BASE_URL}/api/auth/google`,
+        ME: `${API_BASE_URL}/api/auth/me`,
+        UPDATE_NAME: `${API_BASE_URL}/api/auth/update-name`,
+        UPDATE_PROFILE: `${API_BASE_URL}/api/auth/update-profile`,
         PROFILE_PICTURE: `${API_BASE_URL}/api/auth/profile-picture`,
     },
     WORKOUT: {
-        SESSIONS: `${API_BASE_URL}/api/workout/sessions`,
-        ANALYZE: `${API_BASE_URL}/api/workout/analyze`,
+        SESSION: `${API_BASE_URL}/api/workout/session`,
+        HISTORY: `${API_BASE_URL}/api/workout/history`,
     },
     DIET: {
         PLAN: `${API_BASE_URL}/api/diet/plan`,
@@ -19,8 +22,11 @@ export const API_ENDPOINTS = {
     BUDDY: {
         CHAT: `${WS_BASE_URL}/api/buddy/chat`,
     },
+    HABIT: {
+        PREDICT: `${API_BASE_URL}/api/habit/predict`,
+    },
     ANALYTICS: {
-        SUMMARY: `${API_BASE_URL}/api/analytics/summary`,
+        SUMMARY: `${API_BASE_URL}/api/analytics/summary/me`,
         WEEKLY: `${API_BASE_URL}/api/analytics/weekly-report/me`,
     }
 };

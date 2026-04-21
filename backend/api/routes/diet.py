@@ -19,6 +19,7 @@ async def diet_chat_endpoint(websocket: WebSocket):
     await websocket.accept()
     
     # Store conversation history for memory
+    MAX_HISTORY = 20  # Prevent unbounded memory growth
     chat_history = [
         {"role": "system", "content": "You are GYM GURU Dietician, an expert, enthusiastic sports nutritionist and RAG assistant. Keep your responses concise, action-oriented, and fitness-focused under 50 words. Recommend specific food items when relevant."}
     ]
@@ -37,12 +38,16 @@ async def diet_chat_endpoint(websocket: WebSocket):
                         max_tokens=150
                     )
                     ai_reply = response.choices[0].message.content
-                except Exception as e:
-                    ai_reply = f"Groq Error: {str(e)[:80]}. Check your API Key."
+                except Exception:
+                    ai_reply = "I'm having trouble connecting right now. Please try again in a moment."
             else:
                  ai_reply = "Ensure high protein intake (1.6g/kg) and stay hydrated. (Add GROQ_API_KEY to .env)"
 
             chat_history.append({"role": "assistant", "content": ai_reply})
+
+            # Keep only system prompt + last N messages to prevent memory leak
+            if len(chat_history) > MAX_HISTORY + 1:
+                chat_history = [chat_history[0]] + chat_history[-(MAX_HISTORY):]
 
             payload = {
                 "message": ai_reply,

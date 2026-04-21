@@ -13,7 +13,7 @@ async def lifespan(app: FastAPI):
     # Startup
     client = AsyncIOMotorClient(settings.MONGODB_URL)
     await init_beanie(
-        database=client.unlox_db,
+        database=client.gym_guru_db,
         document_models=[User, WorkoutSession],
     )
     yield
@@ -29,8 +29,12 @@ app = FastAPI(
 
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],
-    allow_credentials=False,
+    allow_origins=[
+        "http://localhost:3000",
+        "https://gym-guru-ai.web.app",
+        "https://gym-guru-ai.firebaseapp.com",
+    ],
+    allow_credentials=True,
     allow_methods=["*"],
     allow_headers=["*"],
 )

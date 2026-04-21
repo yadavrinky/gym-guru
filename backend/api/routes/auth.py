@@ -1,5 +1,5 @@
 from fastapi import APIRouter, HTTPException, Depends, status
-from pydantic import BaseModel, EmailStr
+from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 from datetime import timedelta
 from db.models.users import User
@@ -30,6 +30,21 @@ class UserCreate(BaseModel):
     fitness_goal: Optional[str] = None
     experience_level: Optional[str] = None
     workouts_per_week: Optional[int] = None
+
+    @field_validator("password")
+    @classmethod
+    def validate_password(cls, v: str) -> str:
+        if len(v) < 8:
+            raise ValueError("Password must be at least 8 characters")
+        return v
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 2 or len(v) > 100:
+            raise ValueError("Name must be between 2 and 100 characters")
+        return v
 
 class Token(BaseModel):
     access_token: str
@@ -100,7 +115,6 @@ async def google_auth(req: GoogleAuthRequest):
         
         # Auto-register if new user
         if not user:
-            # Generate random password for google users (since they login via token)
             import secrets
             random_pass = get_password_hash(secrets.token_hex(16))
             user = User(
@@ -115,18 +129,39 @@ async def google_auth(req: GoogleAuthRequest):
             data={"sub": str(user.id)}, expires_delta=access_token_expires
         )
         return {"access_token": access_token, "token_type": "bearer"}
-    except Exception as e:
+    except HTTPException:
+        raise
+    except Exception:
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail=f"Invalid Google Token: {str(e)}",
+            detail="Google authentication failed. Please try again.",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
-class ProfilePictureUpdate(BaseModel):
-    avatar_url: str
+# ── User Profile Endpoints ──────────────────────────────────────
+
+@router.get("/me")
+async def get_me(current_user: User = Depends(get_current_user)):
+    """Return current authenticated user's profile."""
+    return {
+        "id": str(current_user.id),
+        "email": current_user.email,
+        "name": current_user.name,
+        "avatar_url": current_user.avatar_url,
+        "profile": current_user.profile.model_dump() if current_user.profile else {},
+        "created_at": current_user.created_at.isoformat(),
+    }
 
 class NameUpdate(BaseModel):
     name: str
+
+    @field_validator("name")
+    @classmethod
+    def validate_name(cls, v: str) -> str:
+        v = v.strip()
+        if len(v) < 2 or len(v) > 100:
+            raise ValueError("Name must be between 2 and 100 characters")
+        return v
 
 @router.put("/update-name")
 async def update_name(
@@ -137,6 +172,29 @@ async def update_name(
     await current_user.save()
     return {"status": "success", "name": current_user.name}
 
+class ProfileUpdate(BaseModel):
+    age: Optional[int] = None
+    weight_kg: Optional[float] = None
+    height_cm: Optional[float] = None
+    fitness_goal: Optional[str] = None
+    experience_level: Optional[str] = None
+    workouts_per_week: Optional[int] = None
+
+@router.put("/update-profile")
+async def update_profile(
+    payload: ProfileUpdate,
+    current_user: User = Depends(get_current_user)
+):
+    """Update onboarding/profile fields for the current user."""
+    update_data = payload.model_dump(exclude_none=True)
+    for key, value in update_data.items():
+        setattr(current_user.profile, key, value)
+    await current_user.save()
+    return {"status": "success", "profile": current_user.profile.model_dump()}
+
+class ProfilePictureUpdate(BaseModel):
+    avatar_url: str
+
 @router.put("/profile-picture")
 async def update_profile_picture(
     payload: ProfilePictureUpdate,
@@ -145,4 +203,3 @@ async def update_profile_picture(
     current_user.avatar_url = payload.avatar_url
     await current_user.save()
     return {"status": "success", "avatar_url": current_user.avatar_url}
-

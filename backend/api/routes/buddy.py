@@ -60,6 +60,7 @@ async def buddy_chat_endpoint(websocket: WebSocket):
     await websocket.accept()
     
     chat_history = []
+    MAX_HISTORY = 20  # Prevent unbounded memory growth
     
     try:
         while True:
@@ -93,6 +94,10 @@ async def buddy_chat_endpoint(websocket: WebSocket):
             
             chat_history.append({"role": "user", "content": data})
             chat_history.append({"role": "assistant", "content": ai_reply})
+
+            # Keep only the last N messages to prevent memory leak
+            if len(chat_history) > MAX_HISTORY:
+                chat_history = chat_history[-MAX_HISTORY:]
             
             response_payload = {
                 "message": ai_reply,

@@ -62,7 +62,7 @@ export default function HabitPage() {
                 </div>
                 <h3 className="text-2xl font-semibold">Chance of skipping today</h3>
                 <p className="text-slate-900/50 max-w-md mx-auto">
-                  Our AI analyzes your recent activity patterns. High chance of skipping? Let's prove it wrong. Get an easy workout in!
+                  Our AI analyzes your recent activity patterns. High chance of skipping? Let&apos;s prove it wrong. Get an easy workout in!
                 </p>
               </div>
             ) : (

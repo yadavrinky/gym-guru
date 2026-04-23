@@ -9,12 +9,17 @@ import { calculateAngle } from '@/utils/angles';
 
 interface WebcamTrackerProps {
   exercise: string;
+  onRepCountChange?: (count: number) => void;
+  onSessionComplete?: (sessionData: any) => void;
 }
 
-const WebcamTracker: React.FC<WebcamTrackerProps> = ({ exercise }) => {
+const WebcamTracker: React.FC<WebcamTrackerProps> = ({ exercise, onRepCountChange, onSessionComplete }) => {
   const videoRef = useRef<HTMLVideoElement>(null);
   const [results, setResults] = useState<Results | null>(null);
   const [repCount, setRepCount] = useState(0);
+  const [isTracking, setIsTracking] = useState(false);
+  const [startTime, setStartTime] = useState<Date | null>(null);
+  const [skeletalLog, setSkeletalLog] = useState<{timestamp: number, angles: Record<string, number>}[]>([]);
   const repCounterRef = useRef(new RepCounter(exercise));
 
   const onPoseResults = useCallback((poseResults: Results) => {
@@ -22,17 +27,40 @@ const WebcamTracker: React.FC<WebcamTrackerProps> = ({ exercise }) => {
 
     if (poseResults.poseLandmarks) {
       const landmarks = poseResults.poseLandmarks;
-      const hip = landmarks[24];
-      const knee = landmarks[26];
-      const ankle = landmarks[28];
+      
+      // Select joints based on exercise
+      let p1, p2, p3;
+      
+      if (exercise === 'squat') {
+        p1 = landmarks[24]; // Right Hip
+        p2 = landmarks[26]; // Right Knee
+        p3 = landmarks[28]; // Right Ankle
+      } else {
+        // Bicep Curl or Pushup
+        p1 = landmarks[12]; // Right Shoulder
+        p2 = landmarks[14]; // Right Elbow
+        p3 = landmarks[16]; // Right Wrist
+      }
 
-      if (hip && knee && ankle) {
-        const angle = calculateAngle(hip, knee, ankle);
+      if (p1 && p2 && p3) {
+        const angle = calculateAngle(p1, p2, p3);
         const count = repCounterRef.current.update(angle);
-        setRepCount(count);
+        
+        if (isTracking) {
+          // Log key angles if we're tracking a session
+          setSkeletalLog(prev => [...prev, {
+            timestamp: Date.now(),
+            angles: { [repCounterRef.current.config.joint]: angle }
+          }]);
+        }
+
+        if (count !== repCount) {
+          setRepCount(count);
+          onRepCountChange?.(count);
+        }
       }
     }
-  }, []);
+  }, [exercise, repCount, onRepCountChange]);
 
   const { isLoaded, error } = useMediaPipe(videoRef, onPoseResults);
 
@@ -68,22 +96,66 @@ const WebcamTracker: React.FC<WebcamTrackerProps> = ({ exercise }) => {
       <CanvasOverlay results={results} repCount={repCount} />
 
       <div className="absolute bottom-6 left-6 right-6 flex justify-between items-center z-10">
-        <div className="glass-dark px-6 py-3 rounded-2xl">
-          <span className="text-emerald-400 font-bold text-2xl">{repCount}</span>
-          <span className="text-slate-900/60 ml-2 text-sm uppercase tracking-widest">Reps</span>
+        <div className="flex gap-2 items-center">
+          <div className="glass-dark px-6 py-3 rounded-2xl">
+            <span className="text-emerald-400 font-bold text-2xl">{repCount}</span>
+            <span className="text-slate-900/60 ml-2 text-sm uppercase tracking-widest">Reps</span>
+          </div>
+          <div className="glass-dark px-4 py-2 rounded-xl text-xs text-slate-900/50 uppercase tracking-widest">
+            {exercise}
+          </div>
         </div>
-        <div className="glass-dark px-4 py-2 rounded-xl text-xs text-slate-900/50 uppercase tracking-widest">
-          {exercise}
+
+        <div className="flex gap-2">
+          {!isTracking ? (
+            <button
+              onClick={() => {
+                setIsTracking(true);
+                setStartTime(new Date());
+                setRepCount(0);
+                repCounterRef.current.reset();
+                setSkeletalLog([]);
+              }}
+              className="bg-emerald-500 hover:bg-emerald-600 px-6 py-3 rounded-2xl text-slate-900 font-bold transition-all shadow-lg shadow-emerald-500/20"
+            >
+              Start Session
+            </button>
+          ) : (
+            <button
+              onClick={() => {
+                setIsTracking(false);
+                if (startTime) {
+                  const endTime = new Date();
+                  onSessionComplete?.({
+                    exercise_type: exercise,
+                    started_at: startTime.toISOString(),
+                    ended_at: endTime.toISOString(),
+                    duration_seconds: Math.floor((endTime.getTime() - startTime.getTime()) / 1000),
+                    reps: repCount,
+                    sets: 1,
+                    skeletal_log: skeletalLog.slice(-50), // Only send key samples to avoid payload size issues
+                    calories_burned: repCount * 7.5
+                  });
+                }
+              }}
+              className="bg-rose-500 hover:bg-rose-600 px-6 py-3 rounded-2xl text-white font-bold transition-all shadow-lg shadow-rose-500/20"
+            >
+              Finish Session
+            </button>
+          )}
+          
+          <button
+            onClick={() => {
+              repCounterRef.current.reset();
+              setRepCount(0);
+              setIsTracking(false);
+              setSkeletalLog([]);
+            }}
+            className="glass-dark hover:bg-white/10 px-4 py-3 rounded-2xl text-slate-900 font-medium transition-all"
+          >
+            Reset
+          </button>
         </div>
-        <button
-          onClick={() => {
-            repCounterRef.current.reset();
-            setRepCount(0);
-          }}
-          className="glass-dark hover:bg-white/10 px-6 py-3 rounded-2xl text-slate-900 font-medium transition-all"
-        >
-          Reset
-        </button>
       </div>
     </div>
   );

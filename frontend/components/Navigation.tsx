@@ -1,14 +1,20 @@
 "use client";
 
+import React from 'react';
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { LayoutDashboard, Activity, Utensils, Heart, Dumbbell } from 'lucide-react';
+import { useAuth } from '@/context/AuthContext';
 
 export default function Navigation() {
   const pathname = usePathname();
+  const { token, isLoading } = useAuth();
   
-  // Hide on public routes
-  if (pathname === '/' || pathname === '/login' || pathname === '/register') {
+  // Hide on auth routes, or home if not logged in
+  const isAuthRoute = ['/login', '/register', '/login/', '/register/'].includes(pathname);
+  const isLoggedIn = !!token;
+  
+  if (isLoading || isAuthRoute || (pathname === '/' && !isLoggedIn)) {
     return null;
   }
 

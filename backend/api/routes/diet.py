@@ -2,7 +2,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
 import json
 from openai import AsyncOpenAI
 from core.config import settings
-from core.security import get_current_user
+from core.security import get_current_user, get_current_user_ws
 from db.models.users import User
 
 router = APIRouter()
@@ -14,9 +14,16 @@ client = AsyncOpenAI(
 )
 
 @router.websocket("/chat")
-async def diet_chat_endpoint(websocket: WebSocket):
+async def diet_chat_endpoint(websocket: WebSocket, token: str = None):
     """WebSocket diet chat. Full path: /api/diet/chat"""
     await websocket.accept()
+    if not token:
+        await websocket.close(code=1008)
+        return
+    user = await get_current_user_ws(token)
+    if not user:
+        await websocket.close(code=1008)
+        return
     
     # Store conversation history for memory
     MAX_HISTORY = 20  # Prevent unbounded memory growth

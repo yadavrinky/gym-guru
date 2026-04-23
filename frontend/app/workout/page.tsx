@@ -3,6 +3,7 @@
 import React, { useState } from 'react';
 import WebcamTracker from '@/components/camera/WebcamTracker';
 import { Dumbbell, ChevronDown } from 'lucide-react';
+import ProtectedRoute from '@/components/ProtectedRoute';
 
 const EXERCISES = [
   { id: 'squat', name: 'Squat', icon: '🏋️' },
@@ -17,6 +18,7 @@ export default function WorkoutPage() {
   const current = EXERCISES.find(e => e.id === selectedExercise) || EXERCISES[0];
 
   return (
+    <ProtectedRoute>
     <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-200 text-slate-900 p-4 md:p-8">
       <div className="max-w-5xl mx-auto space-y-8">
         <header className="flex items-center justify-between">
@@ -64,6 +66,7 @@ export default function WorkoutPage() {
         </div>
       </div>
     </div>
+    </ProtectedRoute>
   );
 }
 

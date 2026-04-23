@@ -3,6 +3,7 @@ from fastapi import APIRouter, WebSocket, WebSocketDisconnect
 import json
 from openai import AsyncOpenAI
 from core.config import settings
+from core.security import get_current_user_ws
 
 router = APIRouter()
 
@@ -56,8 +57,15 @@ PROMPT_TEMPLATES = {
 }
 
 @router.websocket("/chat")
-async def buddy_chat_endpoint(websocket: WebSocket):
+async def buddy_chat_endpoint(websocket: WebSocket, token: str = None):
     await websocket.accept()
+    if not token:
+        await websocket.close(code=1008)
+        return
+    user = await get_current_user_ws(token)
+    if not user:
+        await websocket.close(code=1008)
+        return
     
     chat_history = []
     MAX_HISTORY = 20  # Prevent unbounded memory growth

@@ -2,7 +2,7 @@ from fastapi import APIRouter, HTTPException, Depends, status
 from pydantic import BaseModel, EmailStr, field_validator
 from typing import Optional
 from datetime import timedelta
-from db.models.users import User
+from db.models.users import User, UserProfile
 from core.security import get_password_hash, verify_password, create_access_token, get_current_user
 from core.config import settings
 import firebase_admin
@@ -131,10 +131,11 @@ async def google_auth(req: GoogleAuthRequest):
         return {"access_token": access_token, "token_type": "bearer"}
     except HTTPException:
         raise
-    except Exception:
+    except Exception as e:
+        print(f"Google Auth Error: {str(e)}")
         raise HTTPException(
             status_code=status.HTTP_401_UNAUTHORIZED,
-            detail="Google authentication failed. Please try again.",
+            detail=f"Google authentication failed: {str(e)}",
             headers={"WWW-Authenticate": "Bearer"},
         )
 
@@ -179,6 +180,8 @@ class ProfileUpdate(BaseModel):
     fitness_goal: Optional[str] = None
     experience_level: Optional[str] = None
     workouts_per_week: Optional[int] = None
+    dietary_preference: Optional[str] = None
+    activity_level: Optional[str] = None
 
 @router.put("/update-profile")
 async def update_profile(
@@ -186,6 +189,9 @@ async def update_profile(
     current_user: User = Depends(get_current_user)
 ):
     """Update onboarding/profile fields for the current user."""
+    if current_user.profile is None:
+        current_user.profile = UserProfile()
+        
     update_data = payload.model_dump(exclude_none=True)
     for key, value in update_data.items():
         setattr(current_user.profile, key, value)

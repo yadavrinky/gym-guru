@@ -7,9 +7,11 @@ import { Eye, EyeOff, ArrowRight } from 'lucide-react';
 import { auth, googleProvider } from '@/utils/firebase';
 import { signInWithPopup } from 'firebase/auth';
 import { API_ENDPOINTS } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 export default function LoginPage() {
   const router = useRouter();
+  const { login } = useAuth();
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
@@ -35,7 +37,8 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('gym_guru_token', data.access_token);
+      login(data.access_token);
+
       router.push('/dashboard');
     } catch (err: any) {
       const msg = err.response?.data?.detail || err.message || 'Something went wrong';
@@ -67,7 +70,8 @@ export default function LoginPage() {
       }
 
       const data = await res.json();
-      localStorage.setItem('gym_guru_token', data.access_token);
+      login(data.access_token);
+
       router.push('/dashboard');
     } catch (err) {
       setError(err instanceof Error ? err.message : 'Google Auth Error');

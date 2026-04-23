@@ -3,6 +3,7 @@
 import React, { useState, useEffect, useRef } from 'react';
 import { Send, User, Bot } from 'lucide-react';
 import { API_ENDPOINTS } from '@/utils/api';
+import { useAuth } from '@/context/AuthContext';
 
 interface Message {
   role: 'user' | 'bot';
@@ -18,6 +19,7 @@ const ChatBox: React.FC<ChatBoxProps> = ({
   endpoint = API_ENDPOINTS.DIET.CHAT,
   botName = 'GYM GURU Dietician',
 }) => {
+  const { token } = useAuth();
   const [messages, setMessages] = useState<Message[]>([
     { role: 'bot', content: `Hello! I am your ${botName}. How can I help you today?` }
   ]);
@@ -31,7 +33,12 @@ const ChatBox: React.FC<ChatBoxProps> = ({
     let reconnectTimeout: NodeJS.Timeout;
 
     const connect = () => {
-      socket = new WebSocket(endpoint);
+      const wsUrl = new URL(endpoint);
+      if (token) {
+        wsUrl.searchParams.append('token', token);
+      }
+      
+      socket = new WebSocket(wsUrl.toString());
       socketRef.current = socket;
 
       socket.onopen = () => setIsConnected(true);

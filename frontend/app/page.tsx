@@ -1,5 +1,6 @@
 import Link from "next/link";
 import { ArrowRight, Activity, Camera, Brain, MessageSquare } from "lucide-react";
+import type { ReactNode } from "react";
 
 export default function Home() {
   return (
@@ -18,11 +19,13 @@ export default function Home() {
         </p>
 
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6 mt-12 mb-16 text-left">
-          <FeatureCard 
-            icon={<Camera className="w-8 h-8 text-emerald-400" />}
-            title="AI Trainer"
-            desc="Real-time pose tracking & rep counting. 100% on-device privacy."
-          />
+          <Link href="/workout">
+            <FeatureCard 
+              icon={<Camera className="w-8 h-8 text-emerald-400" />}
+              title="AI Trainer"
+              desc="Real-time pose tracking & rep counting. 100% on-device privacy."
+            />
+          </Link>
           <FeatureCard 
             icon={<MessageSquare className="w-8 h-8 text-blue-400" />}
             title="Smart Dietician"
@@ -53,7 +56,7 @@ export default function Home() {
   );
 }
 
-function FeatureCard({ icon, title, desc }: { icon: React.ReactNode, title: string, desc: string }) {
+function FeatureCard({ icon, title, desc }: { icon: ReactNode; title: string; desc: string }) {
   return (
     <div className="glass-dark p-6 rounded-2xl hover:-translate-y-2 transition-transform duration-300">
       <div className="mb-4">{icon}</div>

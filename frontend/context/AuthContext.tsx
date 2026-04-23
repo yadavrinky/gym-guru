@@ -38,8 +38,7 @@ export const AuthProvider: React.FC<{ children: React.ReactNode }> = ({ children
 
   const fetchUserProfile = async (authToken: string) => {
     try {
-      const baseUrl = API_ENDPOINTS.AUTH.LOGIN.replace('/api/auth/login', '');
-      const res = await fetch(`${baseUrl}/api/auth/me`, {
+      const res = await fetch(API_ENDPOINTS.AUTH.ME, {
         headers: { 'Authorization': `Bearer ${authToken}` }
       });
       if (res.ok) {

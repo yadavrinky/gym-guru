@@ -20,3 +20,8 @@ Thumbs.db
 # IDE
 .vscode/
 .idea/
+
+# Next.js Build
+frontend/out/
+frontend/.next/
+backend/.pytest_cache/

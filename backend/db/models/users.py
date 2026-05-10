@@ -6,6 +6,7 @@ from datetime import datetime, timezone
 class UserProfile(BaseModel):
     age: Optional[int] = None
     gender: Optional[str] = None
+    date_of_birth: Optional[str] = None
     height_cm: Optional[float] = None
     weight_kg: Optional[float] = None
     bmi: Optional[float] = None

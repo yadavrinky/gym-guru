@@ -38,8 +38,8 @@ app.add_middleware(
     CORSMiddleware,
     allow_origins=[
         "http://localhost:3000",
-        "https://gym-guru-ai.web.app",
-        "https://gym-guru-ai.firebaseapp.com",
+        "https://unlox-ai.web.app",
+        "https://unlox-ai.firebaseapp.com",
     ],
     allow_credentials=True,
     allow_methods=["*"],

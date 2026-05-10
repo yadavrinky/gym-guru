@@ -175,6 +175,8 @@ async def update_name(
 
 class ProfileUpdate(BaseModel):
     age: Optional[int] = None
+    gender: Optional[str] = None
+    date_of_birth: Optional[str] = None
     weight_kg: Optional[float] = None
     height_cm: Optional[float] = None
     fitness_goal: Optional[str] = None

@@ -1,9 +1,12 @@
-from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends
+from fastapi import APIRouter, WebSocket, WebSocketDisconnect, Depends, Request
 import json
+from typing import List
 from openai import AsyncOpenAI
 from core.config import settings
 from core.security import get_current_user, get_current_user_ws
 from db.models.users import User
+from db.models.food import FoodEntry
+from datetime import datetime, timezone
 
 router = APIRouter()
 
@@ -11,6 +14,13 @@ router = APIRouter()
 client = AsyncOpenAI(
     api_key=settings.GROQ_API_KEY,
     base_url="https://api.groq.com/openai/v1"
+)
+
+# Phase 3: Strict AI Persona Separation - Dietitian
+DIETITIAN_SYSTEM_PROMPT = (
+    "You are 'Gym Guru Dietitian', an expert clinical nutritionist. Your ONLY job is meal planning, macros, calories, and healthy eating. "
+    "CRITICAL RULE: You are NOT a personal trainer. If asked about lifting weights, workout routines, exercise form, or cardio, "
+    "REFUSE to answer and reply exactly with: 'I handle the kitchen, not the gym! For questions about workouts, please switch over to the Gym Buddy AI tab.'"
 )
 
 @router.websocket("/chat")
@@ -28,7 +38,7 @@ async def diet_chat_endpoint(websocket: WebSocket, token: str = None):
     # Store conversation history for memory
     MAX_HISTORY = 20  # Prevent unbounded memory growth
     chat_history = [
-        {"role": "system", "content": "You are GYM GURU Dietician, an expert, enthusiastic sports nutritionist and RAG assistant. Keep your responses concise, action-oriented, and fitness-focused under 50 words. Recommend specific food items when relevant."}
+        {"role": "system", "content": DIETITIAN_SYSTEM_PROMPT}
     ]
 
     try:
@@ -63,6 +73,43 @@ async def diet_chat_endpoint(websocket: WebSocket, token: str = None):
             await websocket.send_text(json.dumps(payload))
     except WebSocketDisconnect:
         pass
+
+@router.post("/food", response_model=dict)
+async def create_food_entry(
+    request: Request,
+    payload: FoodEntry,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Log a food entry. user_id is injected from current_user.
+    """
+    db = request.app.state.db
+    entry_dict = payload.model_dump(by_alias=True, exclude={"id"})
+    entry_dict["user_id"] = str(current_user.id)
+    
+    result = await db.foods.insert_one(entry_dict)
+    return {"id": str(result.inserted_id), "status": "success"}
+
+@router.get("/today", response_model=List[FoodEntry])
+async def get_today_foods(
+    request: Request,
+    current_user: User = Depends(get_current_user)
+):
+    """
+    Get all food entries for today for the current user.
+    """
+    db = request.app.state.db
+    today_start = datetime.now(timezone.utc).replace(hour=0, minute=0, second=0, microsecond=0)
+    
+    cursor = db.foods.find({
+        "user_id": str(current_user.id),
+        "entry_date": {"$gte": today_start}
+    })
+    
+    entries = []
+    async for doc in cursor:
+        entries.append(FoodEntry(**doc))
+    return entries
 
 @router.get("/plan")
 async def get_diet_plan(current_user: User = Depends(get_current_user)):

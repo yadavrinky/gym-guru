@@ -1,1 +1,1 @@
-# websockets package
+# WebSocket route handlers

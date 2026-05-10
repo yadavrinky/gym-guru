@@ -13,6 +13,13 @@ client = AsyncOpenAI(
     base_url="https://api.groq.com/openai/v1"
 )
 
+# Phase 3: Strict AI Persona Separation - Gym Buddy
+BUDDY_SYSTEM_PROMPT = (
+    "You are 'Gym Guru Buddy', an expert fitness coach. Your ONLY job is workouts, lifting form, exercise science, and recovery. "
+    "CRITICAL RULE: You are NOT a nutritionist. If asked about diets, meal plans, calories, recipes, or macros, "
+    "REFUSE to answer and reply exactly with: 'I'm your gym buddy, not a chef! For questions about food, please switch over to the Dietitian AI tab.'"
+)
+
 async def classify_sentiment(text: str) -> str:
     """
     Uses Hugging Face Inference API (SST-2) to detect sentiment.
@@ -48,14 +55,6 @@ async def classify_sentiment(text: str) -> str:
         print(f"HuggingFace Error: {e}")
         return "neutral"
 
-PROMPT_TEMPLATES = {
-    "motivated": "Match their energy. Celebrate wins. Suggest a slight increase in challenge.",
-    "neutral": "Be encouraging and informative. Keep tone friendly and supportive.",
-    "tired": "Be gentle. Acknowledge effort. Suggest lighter alternatives or rest.",
-    "frustrated": "Be calm and validating. Reduce pressure. Focus on progress, not perfection.",
-    "anxious": "Be reassuring. Break goals into tiny steps. Avoid performance pressure.",
-}
-
 @router.websocket("/chat")
 async def buddy_chat_endpoint(websocket: WebSocket, token: str = None):
     await websocket.accept()
@@ -74,15 +73,11 @@ async def buddy_chat_endpoint(websocket: WebSocket, token: str = None):
         while True:
             data = await websocket.receive_text()
             
-            # Now an async call
             sentiment = await classify_sentiment(data)
-            template_instruction = PROMPT_TEMPLATES.get(sentiment, PROMPT_TEMPLATES["neutral"])
             
-            # Build system prompt dynamically based on sentiment
-            system_prompt = f"You are GYM GURU Buddy, an emotionally intelligent fitness companion. The user seems {sentiment}. {template_instruction} Keep responses concise, warm, and under 60 words."
-            
+            # Use the strict system prompt from requirements
             messages = [
-                {"role": "system", "content": system_prompt},
+                {"role": "system", "content": BUDDY_SYSTEM_PROMPT},
                 *chat_history,
                 {"role": "user", "content": data}
             ]
@@ -96,9 +91,9 @@ async def buddy_chat_endpoint(websocket: WebSocket, token: str = None):
                     )
                     ai_reply = response.choices[0].message.content
                 except Exception:
-                    ai_reply = f"I sense you are feeling {sentiment}. {template_instruction} What can I help with?"
+                    ai_reply = "I'm having trouble connecting to my workout brain right now. Let's try again in a bit!"
             else:
-                ai_reply = f"I sense you are feeling {sentiment}. {template_instruction} What can I help with?"
+                ai_reply = f"I'm here to help with your workout! (Add GROQ_API_KEY to .env for real responses)"
             
             chat_history.append({"role": "user", "content": data})
             chat_history.append({"role": "assistant", "content": ai_reply})
@@ -115,4 +110,3 @@ async def buddy_chat_endpoint(websocket: WebSocket, token: str = None):
             await websocket.send_text(json.dumps(response_payload))
     except WebSocketDisconnect:
         print("Buddy client disconnected")
-

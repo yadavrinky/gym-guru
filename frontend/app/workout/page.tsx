@@ -1,80 +1,106 @@
 "use client";
 
-import React, { useState } from 'react';
-import WebcamTracker from '@/components/camera/WebcamTracker';
-import { Dumbbell, ChevronDown } from 'lucide-react';
-import ProtectedRoute from '@/components/ProtectedRoute';
-
-const EXERCISES = [
-  { id: 'squat', name: 'Squat', icon: '🏋️' },
-  { id: 'pushup', name: 'Push-Up', icon: '💪' },
-  { id: 'bicep_curl', name: 'Bicep Curl', icon: '🦾' },
-];
+import { useState } from "react";
+import { Card, CardContent, CardHeader, CardTitle, CardDescription } from "@/components/ui/card";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import { useToast } from "@/hooks/use-toast";
+import api from "@/lib/api";
+import ProtectedRoute from "@/components/ProtectedRoute";
 
 export default function WorkoutPage() {
-  const [selectedExercise, setSelectedExercise] = useState('squat');
-  const [isOpen, setIsOpen] = useState(false);
+  const { toast } = useToast();
+  const [loading, setLoading] = useState(false);
+  const [formData, setFormData] = useState({
+    exercise_name: "",
+    duration_minutes: "",
+    calories_burned: "",
+  });
 
-  const current = EXERCISES.find(e => e.id === selectedExercise) || EXERCISES[0];
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    setLoading(true);
+    try {
+      await api.post("/exercise", {
+        ...formData,
+        duration_minutes: parseFloat(formData.duration_minutes),
+        calories_burned: parseFloat(formData.calories_burned),
+        user_id: "current_user_id"
+      });
+      toast({
+        title: "Workout Logged",
+        description: "Your exercise has been recorded successfully.",
+      });
+      setFormData({ exercise_name: "", duration_minutes: "", calories_burned: "" });
+    } catch (error) {
+      console.error("Failed to log workout", error);
+      toast({
+        title: "Error",
+        description: "Failed to log workout. Please try again.",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <ProtectedRoute>
-    <div className="min-h-screen bg-gradient-to-br from-slate-50 to-gray-200 text-slate-900 p-4 md:p-8">
-      <div className="max-w-5xl mx-auto space-y-8">
-        <header className="flex items-center justify-between">
-          <div>
-            <h1 className="text-3xl md:text-4xl font-bold flex items-center gap-3">
-              <Dumbbell className="text-emerald-400" /> AI Trainer
-            </h1>
-            <p className="text-slate-900/50 mt-1">100% on-device — zero video upload</p>
-          </div>
-
-          {/* Exercise Selector */}
-          <div className="relative">
-            <button
-              onClick={() => setIsOpen(!isOpen)}
-              className="glass-dark px-5 py-3 rounded-2xl flex items-center gap-3 hover:bg-white/10 transition-all"
-            >
-              <span className="text-xl">{current.icon}</span>
-              <span className="font-semibold">{current.name}</span>
-              <ChevronDown size={16} className={`transition-transform ${isOpen ? 'rotate-180' : ''}`} />
-            </button>
-            {isOpen && (
-              <div className="absolute right-0 top-full mt-2 glass-dark rounded-2xl overflow-hidden z-30 min-w-[200px]">
-                {EXERCISES.map(ex => (
-                  <button
-                    key={ex.id}
-                    onClick={() => { setSelectedExercise(ex.id); setIsOpen(false); }}
-                    className={`w-full px-5 py-3 flex items-center gap-3 hover:bg-white/10 transition-all text-left ${ex.id === selectedExercise ? 'bg-emerald-500/20 text-emerald-400' : ''}`}
-                  >
-                    <span className="text-xl">{ex.icon}</span>
-                    <span>{ex.name}</span>
-                  </button>
-                ))}
-              </div>
-            )}
-          </div>
-        </header>
-
-        <WebcamTracker key={selectedExercise} exercise={selectedExercise} />
-
-        <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-          <InfoCard label="Exercise" value={current.name} />
-          <InfoCard label="Target Muscle" value="Legs & Core" />
-          <InfoCard label="Difficulty" value="Intermediate" />
-          <InfoCard label="Est. Calories" value="~8 / min" />
-        </div>
+    <div className="max-w-2xl mx-auto space-y-8">
+      <div>
+        <h2 className="text-3xl font-bold tracking-tight">Log Exercise</h2>
+        <p className="text-muted-foreground">Keep track of your physical activities.</p>
       </div>
+
+      <Card>
+        <CardHeader>
+          <CardTitle>Exercise Details</CardTitle>
+          <CardDescription>Enter the details of your latest workout.</CardDescription>
+        </CardHeader>
+        <CardContent>
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="space-y-2">
+              <Label htmlFor="exercise_name">Exercise Name</Label>
+              <Input
+                id="exercise_name"
+                placeholder="e.g., Bench Press, Running"
+                value={formData.exercise_name}
+                onChange={(e) => setFormData({ ...formData, exercise_name: e.target.value })}
+                required
+              />
+            </div>
+            <div className="grid grid-cols-2 gap-4">
+              <div className="space-y-2">
+                <Label htmlFor="duration">Duration (minutes)</Label>
+                <Input
+                  id="duration"
+                  type="number"
+                  placeholder="30"
+                  value={formData.duration_minutes}
+                  onChange={(e) => setFormData({ ...formData, duration_minutes: e.target.value })}
+                  required
+                />
+              </div>
+              <div className="space-y-2">
+                <Label htmlFor="calories">Calories Burned</Label>
+                <Input
+                  id="calories"
+                  type="number"
+                  placeholder="250"
+                  value={formData.calories_burned}
+                  onChange={(e) => setFormData({ ...formData, calories_burned: e.target.value })}
+                  required
+                />
+              </div>
+            </div>
+            <Button type="submit" className="w-full" disabled={loading}>
+              {loading ? "Saving..." : "Log Exercise"}
+            </Button>
+          </form>
+        </CardContent>
+      </Card>
     </div>
     </ProtectedRoute>
-  );
-}
-
-function InfoCard({ label, value }: { label: string; value: string }) {
-  return (
-    <div className="glass-dark p-4 rounded-2xl">
-      <div className="text-xs text-slate-900/40 uppercase tracking-widest mb-1">{label}</div>
-      <div className="text-lg font-semibold">{value}</div>
-    </div>
   );
 }

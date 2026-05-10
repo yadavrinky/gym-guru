@@ -1,15 +1,15 @@
 import type { Metadata } from "next";
 import { Inter } from "next/font/google";
 import "./globals.css";
-import Navigation from "@/components/Navigation";
-
-import { AuthProvider } from "@/context/AuthContext";
+import SidebarLayout from "@/components/SidebarLayout";
+import { AuthProvider } from "../context/AuthContext";
+import { Toaster } from "@/components/ui/toaster";
 
 const inter = Inter({ subsets: ["latin"] });
 
 export const metadata: Metadata = {
-  title: "GYM GURU - AI Gym & Fitness Assistant",
-  description: "A unified, camera-only AI fitness ecosystem for GYM GURU.",
+  title: "Gym Guru | AI Fitness Assistant",
+  description: "Your personalized AI-powered fitness and nutrition companion.",
 };
 
 export default function RootLayout({
@@ -18,11 +18,13 @@ export default function RootLayout({
   children: React.ReactNode;
 }>) {
   return (
-    <html lang="en">
+    <html lang="en" className="dark">
       <body className={inter.className}>
         <AuthProvider>
-          <Navigation />
-          {children}
+          <SidebarLayout>
+            {children}
+            <Toaster />
+          </SidebarLayout>
         </AuthProvider>
       </body>
     </html>
